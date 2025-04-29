@@ -1,5 +1,7 @@
-var builder = WebApplication.CreateBuilder(args);
+using ProductivityTools.MasterConfiguration;
 
+var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddMasterConfiguration(force: true);
 // Add services to the container.
 
 builder.Services.AddControllers();
