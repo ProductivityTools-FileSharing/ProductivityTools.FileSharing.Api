@@ -18,8 +18,8 @@ pipeline {
         stage('clone') {
             steps {
                 // Get some code from a GitHub repository
-                git branch: 'master',
-                url: 'git@github.com:ProductivityTools-FileSharing/ProductivityTools.FileSharing.Api.git'
+                git branch: 'main',
+                url: 'https://github.com/ProductivityTools-FileSharing/ProductivityTools.FileSharing.Api.git'
             }
         }
         stage('Build PTTrFileSharingips') {
