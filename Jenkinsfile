@@ -99,7 +99,7 @@ pipeline {
         // }
         stage('Copy PTFileSharing Data') {
             steps {
-                bat('xcopy "ProductivityTools.FileSharing.Api\\bin\\Release\\net9.0\\publish" "C:\\Bin\\IIS\\PTFileSharing\\" /O /X /E /H /K')
+                bat('xcopy "ProductivityTools.FileSharing.Api\\bin\\Release\\net8.0\\publish" "C:\\Bin\\IIS\\PTFileSharing\\" /O /X /E /H /K')
 				                      
             }
         }
