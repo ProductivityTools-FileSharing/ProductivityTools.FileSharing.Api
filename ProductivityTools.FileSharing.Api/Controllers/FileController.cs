@@ -44,15 +44,26 @@ namespace ProductivityTools.FileSharing.Api.Controllers
         //}
 
         [HttpPost(Name = "UploadFile")]
+        [RequestSizeLimit(1000 * 1024 * 1024)]
         public ActionResult UploadFile([FromForm] FileModel fileModel)
         {
             var blobServiceClient = GetBlobServiceClient().GetBlobContainerClient("filecontainergs");
             string fileName = Path.GetFileName(fileModel.FormFile.FileName);
             BlobClient blobClient = blobServiceClient.GetBlobClient(fileName);
-            using (var stream = fileModel.FormFile.OpenReadStream())
+            try
             {
-                blobClient.Upload(stream, true);
+
+                using (var stream = fileModel.FormFile.OpenReadStream())
+                {
+                    blobClient.Upload(stream, true);
+                }
             }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error uploading file: {ex.Message}");
+                throw;
+            }
+
             return Ok();
         }
 
@@ -61,16 +72,16 @@ namespace ProductivityTools.FileSharing.Api.Controllers
         public IActionResult Listfiles()
         {
             var blobServiceClient = GetBlobServiceClient().GetBlobContainerClient("filecontainergs");
-            List<string> resutls= new List<string>();
+            List<string> resutls = new List<string>();
             var blobls = blobServiceClient.GetBlobs(BlobTraits.All, BlobStates.All).ToList();
-                blobls.ForEach(x =>
+            blobls.ForEach(x =>
+         {
+             if (!x.Deleted)
              {
-                 if (!x.Deleted)
-                 {
-                     Console.WriteLine(x.Name);
-                     resutls.Add(x.Name);
-                 }
-             });
+                 Console.WriteLine(x.Name);
+                 resutls.Add(x.Name);
+             }
+         });
 
             return Ok(resutls);
         }
