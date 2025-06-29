@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using ProductivityTools.MasterConfiguration;
 
 
@@ -30,6 +32,23 @@ builder.Services.AddCors(options =>
                                       builder.WithOrigins("http://localhost:3000", "https://ptfilesharing-45459715128.us-central1.run.app").AllowAnyHeader().AllowAnyMethod();
                                   });
 });
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.Authority = "https://securetoken.google.com/ptauthumbrella";
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidIssuer = "https://securetoken.google.com/ptauthumbrella",
+        ValidateAudience = true,
+        ValidAudience = "ptauthumbrella",
+        ValidateLifetime = true
+    };
+});
+
 
 var app = builder.Build();
 

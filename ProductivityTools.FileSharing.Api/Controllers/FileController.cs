@@ -1,16 +1,18 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Azure.Identity;
+﻿using Azure.Identity;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs.Specialized;
-using ProductivityTools.FileSharing.Api.Model;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using ProductivityTools.FileSharing.Api.Model;
 
 namespace ProductivityTools.FileSharing.Api.Controllers
 {
     [ApiController]
+    [AuthenticatedUsers]
     [Route("[controller]")]
-    public class FileController : ControllerBase
+    public class FileController : AuthController
     {
 
         public FileController(IConfiguration conf)
@@ -69,7 +71,7 @@ namespace ProductivityTools.FileSharing.Api.Controllers
             return Ok();
         }
 
-
+        [Authorize]
         [HttpGet(Name = "Listfiles")]
         public IActionResult Listfiles()
         {
