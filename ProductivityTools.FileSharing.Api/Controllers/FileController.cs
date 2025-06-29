@@ -4,6 +4,7 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs.Specialized;
 using ProductivityTools.FileSharing.Api.Model;
+using Microsoft.AspNetCore.Authentication;
 
 namespace ProductivityTools.FileSharing.Api.Controllers
 {
@@ -91,6 +92,18 @@ namespace ProductivityTools.FileSharing.Api.Controllers
          });
 
             return Ok(resutls);
+        }
+
+        public class F
+        {
+            public string FileName { get; set; }
+        }
+        [HttpDelete(Name = "DeleteFile")]
+        public IActionResult DeleteFile(F fileName)
+        {
+            var blobServiceClient = GetBlobServiceClient().GetBlobContainerClient("filecontainergs");
+            var r = blobServiceClient.DeleteBlobIfExists(fileName.FileName);
+            return Ok(r);
         }
     }
 }
