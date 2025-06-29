@@ -44,7 +44,8 @@ namespace ProductivityTools.FileSharing.Api.Controllers
         //}
 
         [HttpPost(Name = "UploadFile")]
-        [RequestSizeLimit(1000 * 1024 * 1024)]
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(MultipartBodyLengthLimit = 1073741824)]
         public ActionResult UploadFile([FromForm] FileModel fileModel)
         {
             var blobServiceClient = GetBlobServiceClient().GetBlobContainerClient("filecontainergs");
@@ -72,14 +73,20 @@ namespace ProductivityTools.FileSharing.Api.Controllers
         public IActionResult Listfiles()
         {
             var blobServiceClient = GetBlobServiceClient().GetBlobContainerClient("filecontainergs");
-            List<string> resutls = new List<string>();
+            List<AzureFile> resutls = new List<AzureFile>();
             var blobls = blobServiceClient.GetBlobs(BlobTraits.All, BlobStates.All).ToList();
             blobls.ForEach(x =>
          {
              if (!x.Deleted)
              {
+                 var azureFile = new AzureFile
+                 {
+                     Name = x.Name,
+                     Size = x.Properties.ContentLength.HasValue ? (int)x.Properties.ContentLength / 1024 / 1024 : 0,
+                     Created = x.Properties.CreatedOn.HasValue ? x.Properties.CreatedOn.Value.DateTime : null
+                 };
                  Console.WriteLine(x.Name);
-                 resutls.Add(x.Name);
+                 resutls.Add(azureFile);
              }
          });
 

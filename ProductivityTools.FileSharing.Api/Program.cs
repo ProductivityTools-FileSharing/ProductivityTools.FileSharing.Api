@@ -11,7 +11,7 @@ builder.Configuration.AddMasterConfiguration(force: true);
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
     // Set the limit to 100 MB, for example. You can adjust this value.
-    serverOptions.Limits.MaxRequestBodySize = 1000 * 1024 * 1024;
+    serverOptions.Limits.MaxRequestBodySize = null;
 });
 // Add services to the container.
 
