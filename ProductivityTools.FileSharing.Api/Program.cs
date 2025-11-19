@@ -29,7 +29,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
                                   builder =>
                                   {
-                                      builder.WithOrigins("http://localhost:3000", "https://ptfilesharing-45459715128.us-central1.run.app", "https://ptservicestatus-309299231472.us-central1.run.app").AllowAnyHeader().AllowAnyMethod();
+                                      builder.WithOrigins("http://localhost:3000", "https://productivitytools-filesharing-web-93484780890.europe-west1.run.app").AllowAnyHeader().AllowAnyMethod();
                                   });
 });
 builder.Services.AddAuthentication(options =>
