@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.IdentityModel.Tokens;
 using ProductivityTools.MasterConfiguration;
 
@@ -12,8 +14,20 @@ builder.Configuration.AddMasterConfiguration(force: true);
 // Increase the maximum request body size. The default is approx. 30 MB.
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    // Set the limit to 100 MB, for example. You can adjust this value.
-    serverOptions.Limits.MaxRequestBodySize = null;
+    // Set the limit to 1000 MB.
+    serverOptions.Limits.MaxRequestBodySize = 1073741824;
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    // Set the multipart body limit to 1000 MB
+    options.MultipartBodyLengthLimit = 1073741824;
+});
+
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    // Set the limit to 1000 MB for IIS in-process hosting
+    options.MaxRequestBodySize = 1073741824;
 });
 // Add services to the container.
 
