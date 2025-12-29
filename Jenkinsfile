@@ -52,9 +52,10 @@ pipeline {
                         .\\appcmd.exe add site /name:$Name /bindings:http://$HttpbBnding /physicalpath:$PhysicalPath
                         write-host "assign app pool to the website"
                         .\\appcmd.exe set app "$Name/" /applicationPool:"$Name"
-
-
                     }
+                    write-host "Configuring IIS limits for large files"
+                    .\\appcmd.exe set config "$Name" -section:system.webServer/security/requestFiltering /requestLimits.maxAllowedContentLength:1073741824 /commit:apphost
+                    .\\appcmd.exe set config "$Name" -section:system.webServer/serverRuntime /uploadReadAheadSize:1073741824 /commit:apphost
                 }
                 Create "PTFileSharing" "*:8004"  "C:\\Bin\\IIS\\PTFileSharing\\"                
                 ''')
