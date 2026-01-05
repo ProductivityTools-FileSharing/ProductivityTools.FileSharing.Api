@@ -47,7 +47,7 @@ namespace ProductivityTools.FileSharing.Api.Controllers
         //}
 
         [HttpPost(Name = "UploadFile")]
-        [RequestSizeLimit(1073741824)]
+        [DisableRequestSizeLimit]
         [RequestFormLimits(MultipartBodyLengthLimit = 1073741824)]
         public ActionResult UploadFile([FromForm] FileModel fileModel)
         {
