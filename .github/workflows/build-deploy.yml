@@ -1,0 +1,96 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    # NOTE: If deploying to an on-premises IIS server, you should use a self-hosted runner
+    # installed on that server, and change this to: runs-on: [self-hosted, windows]
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0'
+
+    - name: Build
+      run: dotnet publish ProductivityTools.FileSharing.Api.sln -c Release
+
+    - name: Create PTFileSharing IIS Page
+      shell: powershell
+      run: |
+        function CheckIfExist($Name){
+            $exists = (C:\Windows\System32\inetsrv\appcmd.exe list sites /name:$Name) -ne $null
+            Write-Host "Exists: $exists"
+            return $exists
+        }
+        
+        function Create($Name,$HttpbBnding,$PhysicalPath){
+            $exists = CheckIfExist $Name
+            if ($exists){
+                write-host "Web page already existing"
+            }
+            else
+            {
+                write-host "Creating app pool"
+                C:\Windows\System32\inetsrv\appcmd.exe add apppool /name:$Name /managedRuntimeVersion:"v4.0" /managedPipelineMode:"Integrated"
+                write-host "Creating webage"
+                C:\Windows\System32\inetsrv\appcmd.exe add site /name:$Name /bindings:http://$HttpbBnding /physicalpath:$PhysicalPath
+                write-host "assign app pool to the website"
+                C:\Windows\System32\inetsrv\appcmd.exe set app "$Name/" /applicationPool:"$Name"
+            }
+        }
+        Create "PTFileSharing" "*:8004" "C:\Bin\IIS\PTFileSharing\"
+
+    - name: Stop PTFileSharing on IIS
+      run: C:\Windows\System32\inetsrv\appcmd stop site /site.name:PTFileSharing
+      continue-on-error: true
+
+    - name: Delete PTFileSharing IIS directory
+      shell: powershell
+      run: |
+        if (Test-Path "C:\Bin\IIS\PTFileSharing") {
+            # Try to delete, retry if locked
+            for ($i = 0; $i -lt 10; $i++) {
+                try {
+                    Remove-Item "C:\Bin\IIS\PTFileSharing" -Recurse -Force -ErrorAction Stop
+                    break
+                } catch {
+                    Write-Output "Removing failed, waiting 2 seconds before retry..."
+                    Start-Sleep -Seconds 2
+                }
+            }
+        }
+
+    - name: Copy PTFileSharing Data
+      run: xcopy "ProductivityTools.FileSharing.Api\bin\Release\net9.0\publish" "C:\Bin\IIS\PTFileSharing\" /O /X /E /H /K /Y
+
+    - name: Start PTFileSharing site on IIS
+      run: C:\Windows\System32\inetsrv\appcmd start site /site.name:PTFileSharing
+
+    # Email notification (Optional: requires configuring secrets in GitHub Repository)
+    # - name: Send mail
+    #   if: always()
+    #   uses: dawidd6/action-send-mail@v3
+    #   with:
+    #     server_address: ${{ secrets.SMTP_SERVER }}
+    #     server_port: ${{ secrets.SMTP_PORT }}
+    #     username: ${{ secrets.SMTP_USERNAME }}
+    #     password: ${{ secrets.SMTP_PASSWORD }}
+    #     subject: GitHub Actions Build ${{ job.status }}: ${{ github.repository }}
+    #     to: ${{ secrets.EMAIL_RECIPIENTS }}
+    #     from: GitHub Actions <noreply@github.com>
+    #     body: |
+    #       Build status: ${{ job.status }}
+    #       Job: ${{ github.job }}
+    #       Run ID: ${{ github.run_id }}
+    #       Commit: ${{ github.sha }}
+    #       Link: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
