@@ -43,7 +43,11 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
                                   builder =>
                                   {
-                                      builder.WithOrigins("http://localhost:3000", "https://productivitytools-filesharing-web-93484780890.europe-west1.run.app").AllowAnyHeader().AllowAnyMethod();
+                                      builder.WithOrigins(
+                                        "http://localhost:3000", 
+                                        "https://productivitytools-filesharing-web-93484780890.europe-west1.run.app",
+                                         "https://pt-service-status-93484780890.us-central1.run.app",
+                                            "https://service-status.productivitytools.top").AllowAnyHeader().AllowAnyMethod();
                                   });
 });
 builder.Services.AddAuthentication(options =>
